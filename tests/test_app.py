@@ -1,6 +1,9 @@
 from http import HTTPStatus
+
 from fastapi.testclient import TestClient
+
 from fast_zero.app import app
+
 
 def test_root_deve_retornar_ok():
     client = TestClient(app)
@@ -9,3 +12,12 @@ def test_root_deve_retornar_ok():
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'Hello world!'}
+
+
+def test_html_deve_retornar_o_corpo():
+    client = TestClient(app)
+
+    response = client.get('/html')
+
+    assert response.status_code == HTTPStatus.OK
+    assert '<h1>Hello world!</h1>' in response.text
