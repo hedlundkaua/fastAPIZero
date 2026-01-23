@@ -12,9 +12,14 @@ class UserSchema(BaseModel):
 
 
 class UserPublic(BaseModel):
+    id: int
     username: str
     email: EmailStr
 
 
 class UserBD(UserSchema):
     id: int
+
+
+class USerList(BaseModel):
+    users: list[UserPublic]
