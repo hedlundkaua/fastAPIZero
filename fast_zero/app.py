@@ -69,6 +69,6 @@ def delete_user(user_id: int):
 def get_user_for_id(user_id: int):
     if user_id > len(database) or user_id < 1:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='User not found'
+            status_code=HTTPStatus.NOT_FOUND, detail='Not Found'
         )
     return database[user_id - 1]

@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from fast_zero.app import database
+
 
 def test_root_deve_retornar_ok(client):
 
@@ -95,19 +97,23 @@ def test_delete_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_get_user_for_id_not_found(client):
-    response = client.get('/user/999')
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Not Found'}
-
-
 def test_get_user_for_id(client):
-    response = client.get('/users/2')
+
+    database.append({'username': 'bob', 'email': 'bob@email.com', 'id': 1})
+
+    response = client.get('/users/1')
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'username': 'bob',
         'email': 'bob@email.com',
-        'id': 2,
+        'id': 1,
     }
+
+
+def test_get_user_for_id_not_found(client):
+    database.clear()
+    response = client.get('/user/0')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Not Found'}
