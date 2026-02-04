@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fast_zero.app import database
+from fast_zero.schemas import UserPublic
 
 
 def test_root_deve_retornar_ok(client):
@@ -24,32 +25,28 @@ def test_create_user(client):
         '/users/',
         json={
             'username': 'alice',
-            'email': 'alice@example.com',
+            'email': 'alice@email.com',
             'password': 'secret',
         },
     )
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         'username': 'alice',
-        'email': 'alice@example.com',
+        'email': 'alice@email.com',
         'id': 1,
     }
 
 
 def test_get_lista_de_users(client):
-
     response = client.get('/users')
-
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': [
-            {
-                'username': 'alice',
-                'email': 'alice@example.com',
-                'id': 1,
-            },
-        ]
-    }
+    assert response.json() == {'users': []}
+
+
+def test_get_lista_de_users_com_user(client, user):
+    user_schema = UserPublic.model_validate(user).model_dump()
+    response = client.get('/users')
+    assert response.json() == {'users': [user_schema]}
 
 
 def test_update_user_to_list(client):
