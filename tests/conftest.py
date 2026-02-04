@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 from fast_zero.app import app
+from fast_zero.database import get_session
 from fast_zero.models import table_registry
 
 
@@ -32,8 +33,17 @@ def mock_db_time():
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client(session):
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        # aqui ele faz com que o nosso BD fique na memoria ao
+        # invés de ser o BD real
+        app.dependency_overrides[get_session] = get_session_override
+        yield client  # continua no contexto do BD em memoria
+    # limpa o BD em memoria para que possamos fazer novos testes
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
