@@ -49,20 +49,19 @@ def test_get_lista_de_users_com_user(client, user):
     assert response.json() == {'users': [user_schema]}
 
 
-def test_update_user_to_list(client):
-
+def test_update_user_to_list(client, user):
     response = client.put(
         '/users/1',
         json={
-            'username': 'alice',
-            'email': 'alice@example.com',
+            'username': 'bob',
+            'email': 'bob@example.com',
             'password': 'secret',
         },
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'alice',
-        'email': 'alice@example.com',
+        'username': 'bob',
+        'email': 'bob@example.com',
         'id': 1,
     }
 
@@ -80,7 +79,30 @@ def test_get_put_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_delete_user(client):
+def test_erro_de_update_de_integridade(client, user):
+    client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto@example.com',
+            'password': 'secret',
+        },
+    )
+    response_update = client.put(
+        f'/users/{user.id}',
+        json={
+            'username': 'fausto',
+            'email': 'bob@example.com',
+            'password': 'secretnew',
+        },
+    )
+    assert response_update.status_code == HTTPStatus.CONFLICT
+    assert response_update.json() == {
+        'detail': 'Username or Email already exists'
+    }
+
+
+def test_delete_user(client, user):
     response = client.delete('/users/1')
 
     assert response.status_code == HTTPStatus.OK
