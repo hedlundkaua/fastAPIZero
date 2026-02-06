@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-from fast_zero.app import database
 from fast_zero.schemas import UserPublic
 
 
@@ -35,6 +34,32 @@ def test_create_user(client):
         'email': 'alice@email.com',
         'id': 1,
     }
+
+
+def test_create_user_integrity_username(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': user.username,
+            'email': 'teste@teste.com',
+            'password': 'secret',
+        },
+    )
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {'detail': 'Username already exists'}
+
+
+def test_create_user_integrity_email(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Bob',
+            'email': user.email,
+            'password': 'secret',
+        },
+    )
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {'detail': 'Email already exists'}
 
 
 def test_get_lista_de_users(client):
@@ -116,23 +141,19 @@ def test_delete_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_get_user_for_id(client):
-
-    database.append({'username': 'bob', 'email': 'bob@email.com', 'id': 1})
-
+def test_get_user_for_id(client, user):
     response = client.get('/users/1')
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'bob',
-        'email': 'bob@email.com',
-        'id': 1,
+        'username': user.username,
+        'email': user.email,
+        'id': user.id,
     }
 
 
 def test_get_user_for_id_not_found(client):
-    database.clear()
-    response = client.get('/user/0')
+    response = client.get('/users/999')
 
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Not Found'}
+    assert response.json() == {'detail': 'User not found'}
