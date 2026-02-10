@@ -106,7 +106,7 @@ def update_user(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    if current_user != user_id:
+    if current_user.id != user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
         )
@@ -129,9 +129,9 @@ def update_user(
 def delete_user(
     user_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(create_user),
+    current_user: User = Depends(get_current_user),
 ):
-    if current_user != user_id:
+    if current_user.id != user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail='Not enough permission'
         )
