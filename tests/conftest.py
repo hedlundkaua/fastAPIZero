@@ -73,7 +73,16 @@ def user(session):
     session.add(user)
     session.commit()
     session.refresh(user)
-     #parei aqui não executou o teste 
-    user.clean_password = password
+
+    user.clean_pass = password
 
     return user
+
+
+@pytest.fixture
+def token(client, user):
+    response = client.post(
+        '/token',
+        data={'username': user.username, 'password': user.clean_pass},
+    )
+    return response.json()['access_token']

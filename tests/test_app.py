@@ -74,9 +74,10 @@ def test_get_lista_de_users_com_user(client, user):
     assert response.json() == {'users': [user_schema]}
 
 
-def test_update_user_to_list(client, user):
+def test_update_user_to_list(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'bob',
             'email': 'bob@example.com',
@@ -87,7 +88,7 @@ def test_update_user_to_list(client, user):
     assert response.json() == {
         'username': 'bob',
         'email': 'bob@example.com',
-        'id': 1,
+        'id': user.id,
     }
 
 
@@ -104,7 +105,7 @@ def test_get_put_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_erro_de_update_de_integridade(client, user):
+def test_erro_de_update_de_integridade(client, user, token):
     client.post(
         '/users',
         json={
@@ -115,6 +116,7 @@ def test_erro_de_update_de_integridade(client, user):
     )
     response_update = client.put(
         f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'fausto',
             'email': 'bob@example.com',
@@ -127,9 +129,10 @@ def test_erro_de_update_de_integridade(client, user):
     }
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
-
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}', headers={'Authorization': f'Bearer {token}'}
+    )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'User deleted'}
 
@@ -161,8 +164,7 @@ def test_get_user_for_id_not_found(client):
 
 def test_get_token(client, user):
     response = client.post(
-         #parei aqui não executou o teste 
-        '/token', data={'username': user.email, 'password': user.clean_password},
+        '/token', data={'username': user.email, 'password': user.clean_pass}
     )
     token = response.json()
 
