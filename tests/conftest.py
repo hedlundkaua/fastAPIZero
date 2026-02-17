@@ -13,27 +13,6 @@ from fast_zero.models import User, table_registry
 from fast_zero.security import get_password_hash
 
 
-@contextmanager
-def _moc_db_time(*, model, time=datetime(2026, 2, 1)):
-
-    def fake_time_hook(mapper, connection, target):
-        if hasattr(target, 'create_at'):
-            target.created_at = time
-        if hasattr(target, 'update_at'):
-            target.update_at = time
-
-    event.listen(model, 'before_insert', fake_time_hook)
-
-    yield time
-
-    event.remove(model, 'before_insert', fake_time_hook)
-
-
-@pytest.fixture
-def mock_db_time():
-    return _moc_db_time
-
-
 @pytest.fixture
 def client(session):
     def get_session_override():
@@ -62,19 +41,39 @@ def session():
     engine.dispose()
 
 
+@contextmanager
+def _mock_db_time(*, model, time=datetime(2024, 1, 1)):
+    def fake_time_handler(mapper, connection, target):
+        if hasattr(target, 'created_at'):
+            target.created_at = time
+        if hasattr(target, 'updated_at'):
+            target.updated_at = time
+
+    event.listen(model, 'before_insert', fake_time_handler)
+
+    yield time
+
+    event.remove(model, 'before_insert', fake_time_handler)
+
+
+@pytest.fixture
+def mock_db_time():
+    return _mock_db_time
+
+
 @pytest.fixture
 def user(session):
-    password = 'secret'
+    password = 'testtest'
     user = User(
         username='Teste',
-        email='teste@teste.com',
+        email='teste@test.com',
         password=get_password_hash(password),
     )
     session.add(user)
     session.commit()
     session.refresh(user)
 
-    user.clean_pass = password
+    user.clean_password = password
 
     return user
 
@@ -82,7 +81,7 @@ def user(session):
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        '/token',
-        data={'username': user.email, 'password': user.clean_pass},
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_password},
     )
     return response.json()['access_token']
