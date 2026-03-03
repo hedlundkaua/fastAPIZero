@@ -1,6 +1,8 @@
 from logging.config import fileConfig
 
 import asyncio
+import sys
+import selectors
 
 from logging.config import fileConfig
 
@@ -100,8 +102,11 @@ async def run_async_migrations():
 
 
 def run_migrations_online():
-    asyncio.run(run_async_migrations())
-    
+    loop_factory = None
+    if sys.platform =='win32':
+        loop_factory = lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
+
+    asyncio.run(run_async_migrations(), loop_factory=loop_factory)
 
 if context.is_offline_mode():
     run_migrations_offline()

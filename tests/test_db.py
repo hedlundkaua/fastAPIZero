@@ -40,14 +40,24 @@ async def test_create_todo(session, user):
     await session.commit()
 
     todo = await session.scalar(select(Todo))
+    result = asdict(todo)
 
-    assert asdict(todo) == {
-        'description': 'Test Desc',
-        'id': 1,
-        'state': 'draft',
-        'title': 'Test todo',
-        'user_id': 1,
-    }
+    result = asdict(todo)
+
+    # 1. Validação Rígida (O que você controla)
+    assert result['title'] == 'Test todo'
+    assert result['description'] == 'Test Desc'
+    assert result['state'] == 'draft'
+    assert result['user_id'] == user.id
+
+    # 2. Validação Dinâmica (O que o sistema controla)
+    assert result['id'] is not None
+    assert result['created_at'] is not None
+    assert result['updated_at'] is not None
+
+    # 3. Validação do Relacionamento (Sem testar o usuário inteiro de novo)
+    assert result['user']['username'] == user.username
+    assert result['user']['email'] == user.email
 
 
 @pytest.mark.asyncio
