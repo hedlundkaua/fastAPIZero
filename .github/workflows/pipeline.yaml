@@ -12,7 +12,7 @@ jobs:
 
       - name: Instalar o python
         uses: actions/setup-python@v5
-        wwith:
+        with:
           python-version: '3.14'
 
       - name: Instalar poetry
