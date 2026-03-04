@@ -1,4 +1,4 @@
-name: pipelone
+name: pipeline
 on: [push, pull_request]
 
 jobs:

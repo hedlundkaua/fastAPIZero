@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fast_zero.routers import auth, todos, users
 from fast_zero.schemas import Message
 
-app = FastAPI(title='Matted teste')
+app = FastAPI(title='Matted teste2')
 
 app.include_router(users.router)
 app.include_router(auth.router)
